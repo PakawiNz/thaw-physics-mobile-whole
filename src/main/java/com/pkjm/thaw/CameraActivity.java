@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package api_l;
+package com.pkjm.thaw;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
-import api_l.analyser.ColorAnalyser;
+import com.pkjm.thaw.analyser.ColorAnalyser;
 
 public class CameraActivity extends Activity {
 

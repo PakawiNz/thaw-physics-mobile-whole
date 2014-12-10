@@ -1,12 +1,14 @@
-package api_l.analyser;
+package com.pkjm.thaw.analyser;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import api_l.Camera2BasicFragment;
+import com.pkjm.thaw.Camera2BasicFragment;
 
 public class ColorAnalyser implements Runnable {
     private final Handler handler = new Handler();
@@ -27,16 +29,44 @@ public class ColorAnalyser implements Runnable {
         client.add("192.168.1.38");
     }
 
-
+    private final int spanSize = 40;
+    private final int stepSize = 1;
+    private float[] hsv = new float[3];
     private String getCalcColor(){
-        if (fragment.getmTextureView() != null) {
-            int color;
+        int color = -0;
+        double h=0,s=0,v=0,adj=1;
+
+        try {
             Bitmap bitmap = fragment.getmTextureView().getBitmap();
-            color =  bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+            int cx = bitmap.getWidth() / 2;
+            int cy = bitmap.getHeight() / 2;
+            double count = 0;
+//            double maxrange = Math.sqrt(Math.pow(spanSize/2,2) + Math.pow(spanSize/2,2));
+
+            for (int i = cx-spanSize; i < cx+spanSize; i += stepSize){
+                for (int j = cy-spanSize; j < cy+spanSize; j += stepSize){
+                    Color.colorToHSV(bitmap.getPixel(cx,cy),hsv);
+//                    adj = maxrange - Math.sqrt(Math.pow(i-cx,2) + Math.pow(j-cy,2));
+//                    adj /= maxrange;
+                    h += hsv[0]*adj;
+                    s += hsv[1]*adj;
+                    v += hsv[2]*adj;
+                    count += adj;
+                }
+            }
+
+            hsv[0] = (float)(h / count);
+            hsv[1] = (float)(s / count);
+            hsv[2] = (float)(v / count);
+
+
+            color = Color.HSVToColor(hsv);
             showColorBtn.setBackgroundColor(color);
+        }catch (Exception e){
+            Log.d("thaw-calc-color", "can't get bitmap");
+        }finally {
             return String.format("%010d",color) + ",";
         }
-        return "No Texture Yet,";
     }
 
     public void run() {

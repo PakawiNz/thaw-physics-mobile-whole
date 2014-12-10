@@ -1,4 +1,4 @@
-package api_l.analyser;
+package com.pkjm.thaw.analyser;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

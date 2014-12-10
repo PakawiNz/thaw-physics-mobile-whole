@@ -1,4 +1,4 @@
-package api_l;
+package com.pkjm.thaw;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -88,6 +88,8 @@ public class Camera2BasicFragment extends Fragment {
 
     private CameraDevice mCameraDevice;
 
+    private CameraCharacteristics characteristics;
+
     private Size mPreviewSize;
 
     private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
@@ -142,35 +144,6 @@ public class Camera2BasicFragment extends Fragment {
             switch (mState) {
                 case STATE_PREVIEW: {
                     // We have nothing to do when the camera preview is working normally.
-                    break;
-                }
-                case STATE_WAITING_LOCK: {
-                    int afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
-                        int aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        if (aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                            mState = STATE_WAITING_NON_PRECAPTURE;
-                        } else {
-                            runPrecaptureSequence();
-                        }
-                    }
-                    break;
-                }
-                case STATE_WAITING_PRECAPTURE: {
-                    int aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    if (CaptureResult.CONTROL_AE_STATE_PRECAPTURE == aeState) {
-                        mState = STATE_WAITING_NON_PRECAPTURE;
-                    } else if (CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED == aeState) {
-                        mState = STATE_WAITING_NON_PRECAPTURE;
-                    }
-                    break;
-                }
-                case STATE_WAITING_NON_PRECAPTURE: {
-                    int aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                    if (CaptureResult.CONTROL_AE_STATE_PRECAPTURE != aeState) {
-                        mState = STATE_PICTURE_TAKEN;
-                    }
                     break;
                 }
             }
@@ -257,8 +230,7 @@ public class Camera2BasicFragment extends Fragment {
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         try {
             for (String cameraId : manager.getCameraIdList()) {
-                CameraCharacteristics characteristics
-                        = manager.getCameraCharacteristics(cameraId);
+                characteristics = manager.getCameraCharacteristics(cameraId);
 
                 // We don't use a front facing camera in this sample.
                 if (characteristics.get(CameraCharacteristics.LENS_FACING)
@@ -405,12 +377,29 @@ public class Camera2BasicFragment extends Fragment {
                             // When the session is ready, we start displaying the preview.
                             mCaptureSession = cameraCaptureSession;
                             try {
-                                // Auto focus should be continuous for camera preview.
+
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-                                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                // Flash is automatically enabled when necessary.
+                                        CaptureRequest.CONTROL_AF_MODE_OFF);
+
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+                                        CaptureRequest.CONTROL_AE_MODE_ON);
+
+                                mPreviewRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE,
+                                        (float)14.285714);
+
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
+                                        12);
+
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK,
+                                        true);
+
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,
+                                        true);
+
+//                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+//                                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+//                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
+//                                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build();
