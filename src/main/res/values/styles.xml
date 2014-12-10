@@ -14,6 +14,5 @@
  limitations under the License.
 -->
 <resources>
-    <string name="picture">Picture</string>
-    <string name="description_info">Info</string>
+    <style name="MaterialTheme" parent="android:Theme.Material.Light.NoActionBar.Fullscreen" />
 </resources>

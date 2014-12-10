@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><!--
- Copyright 2014 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2013 The Android Open Source Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,6 +15,15 @@
  limitations under the License.
 -->
 <resources>
-    <string name="picture">Picture</string>
-    <string name="description_info">Info</string>
+    <string name="app_name">Thaw Physics Mobile</string>
+    <string name="intro_message">
+        <![CDATA[
+        
+            
+            This sample demonstrates the basic use of Camera2 API. Check the source code to see how
+            you can display camera preview and take pictures.
+            
+        
+        ]]>
+    </string>
 </resources>

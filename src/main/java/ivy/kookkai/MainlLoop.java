@@ -3,8 +3,8 @@ package ivy.kookkai;
 import ivy.kookkai.data.GlobalVar;
 import ivy.kookkai.debugview.CameraInterface;
 import ivy.kookkai.debugview.DebugImgView;
-import ivy.kookkai.vision.SensorInterface;
-import android.graphics.Color;
+import api_l.analyser.SensorInterface;
+
 import android.os.Handler;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -53,15 +53,13 @@ public class MainlLoop implements Runnable {
 
 		outString = "ROBOT [MK" + GlobalVar.KOOKKAI_MARK + "]" + "\n";
 
-        byte[] testColoring = debugImg.initColorData();
-        for (int i = 1; i < testColoring.length; i++ ){
-            testColoring[i] = (byte)((i/20)%4 + 1);
-        }
-
-        if (false){
-            debugImg.drawImage(testColoring);
-            debugImg.invalidate();
-        }
+//        byte[] testColoring = debugImg.initColorData();
+//        for (int i = 1; i < testColoring.length; i++ ){
+//            testColoring[i] = (byte)((i/20)%4 + 1);
+//        }
+//
+//        debugImg.drawImage(testColoring);
+//        debugImg.invalidate();
 
         outString += sensorInterface.getAccelero() + "\n";
         outString += sensorInterface.getYAngle() + "\n";

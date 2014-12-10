@@ -45,7 +45,6 @@ public class DebugImgView extends View {
     }
 
     public void drawImage(byte[] colorData){
-        // can't move to debugImgView coz vision blob will execute painting
         int outIndex = 0;
         for (int i = 0; i < img.getWidth(); i++) {
             for (int j = 0; j < img.getHeight(); j++, outIndex++) {

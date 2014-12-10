@@ -2,14 +2,12 @@ package ivy.kookkai;
 
 import ivy.kookkai.debugview.CameraInterface;
 import ivy.kookkai.debugview.DebugImgView;
-import ivy.kookkai.vision.SensorInterface;
+import api_l.analyser.SensorInterface;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class KookKaiDroidActivity extends Activity {
@@ -27,7 +25,7 @@ public class KookKaiDroidActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+//		setContentView(R.layout.main);
 
 		Log.d("ivy_debug", "start!!!");
 
@@ -35,33 +33,33 @@ public class KookKaiDroidActivity extends Activity {
 
         createGUI();
 
-        headingText = (TextView) findViewById(R.id.headingText);
-        debugText = (TextView) findViewById(R.id.debugText);
+//        headingText = (TextView) findViewById(R.id.headingText);
+//        debugText = (TextView) findViewById(R.id.debugText);
 
-        main = new MainlLoop(cameraInterface, sensorInterface, debugImgview, debugText, new CheckBox(this));
+//        main = new MainlLoop(cameraInterface, sensorInterface, debugImgview, debugText, new CheckBox(this));
 	}
 
 	private void createGUI() {
-		LinearLayout rootHorizontalLayout = (LinearLayout) findViewById(R.id.upper_view);
+//		LinearLayout rootHorizontalLayout = (LinearLayout) findViewById(R.id.upper_view);
 
         cameraInterface = new CameraInterface(this);
 		cameraInterface.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-		debugImgview = new DebugImgView(this);
-		debugImgview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+//		debugImgview = new DebugImgView(this);
+//		debugImgview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		FrameLayout cameraFrame = new FrameLayout(this);
 		cameraFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 500));
 		cameraFrame.addView(cameraInterface);
-		cameraFrame.addView(debugImgview);
+//		cameraFrame.addView(debugImgview);
 
-        rootHorizontalLayout.addView(cameraFrame);
+//        rootHorizontalLayout.addView(cameraFrame);
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
-		main.start();
+//		main.start();
 	}
 
 	@Override
@@ -72,7 +70,7 @@ public class KookKaiDroidActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		main.stop();
+//		main.stop();
 	}
 
 }
