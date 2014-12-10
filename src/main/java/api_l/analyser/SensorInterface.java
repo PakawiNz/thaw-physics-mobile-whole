@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 public class SensorInterface implements SensorEventListener {
 
 	private SensorManager sensorManager;
+    private double deviceAngle;
 
     public SensorInterface(Activity activity) {
 
@@ -30,24 +31,27 @@ public class SensorInterface implements SensorEventListener {
 
 	/**-------------------------------------> ACCELEROMETER <-------------------------------------*/
 
-	private float[] acc = new float[3];
+	private double[] acc = new double[3];
 
 	private void acceleroMeter_Handler(SensorEvent event) {
-		acc[0] = event.values[0];
-		acc[1] = event.values[1];
-		acc[2] = event.values[2];
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            final double alpha = 0.8;
+            // Isolate the force of gravity with the low-pass filter.
+            acc[0] = alpha * acc[0] + (1 - alpha) * event.values[0];
+            acc[1] = alpha * acc[1] + (1 - alpha) * event.values[1];
+            acc[2] = alpha * acc[2] + (1 - alpha) * event.values[2];
+
+            double easyAngleRad = Math.atan2(acc[1], acc[0]);
+            final double beta = 0.8;
+            deviceAngle = beta * deviceAngle + (1 - beta) * easyAngleRad;
+        }
 	}
 
     public String getAccelero(){
         return "x:" + acc[0] + " y:" + acc[1] + " z:" +acc[2];
     }
 
-    public String getYAngle(){
-        double sum = Math.sqrt(
-                Math.pow(acc[0],2)+
-                Math.pow(acc[1],2)+
-                Math.pow(acc[2],2));
-
-        return "sum:" + sum;
+    public String getDeviceAngle() {
+        return "" + String.format("%3.1f",Math.toDegrees(deviceAngle) + 180);
     }
 }

@@ -8,9 +8,6 @@ import android.widget.TextView;
 
 import api_l.Camera2BasicFragment;
 
-/**
- * Created by PakawiNz on 10/12/2557.
- */
 public class ColorAnalyser implements Runnable {
     private final Handler handler = new Handler();
     SensorInterface sensorInterface;
@@ -30,17 +27,25 @@ public class ColorAnalyser implements Runnable {
         client.add("192.168.1.38");
     }
 
+
+    private String getCalcColor(){
+        if (fragment.getmTextureView() != null) {
+            int color;
+            Bitmap bitmap = fragment.getmTextureView().getBitmap();
+            color =  bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+            showColorBtn.setBackgroundColor(color);
+            return String.format("%010d",color) + ",";
+        }
+        return "No Texture Yet,";
+    }
+
     public void run() {
         long timeStamp = System.currentTimeMillis();
 
         outString = "";
 
-        if (fragment.getmTextureView() != null) {
-            Bitmap bitmap = fragment.getmTextureView().getBitmap();
-            int color =  bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-            showColorBtn.setBackgroundColor(color);
-            outString += color;
-        }
+        outString += getCalcColor();
+        outString += sensorInterface.getDeviceAngle() + ",";
 
         debugText.setText(outString);
         client.sendMessage(outString);
