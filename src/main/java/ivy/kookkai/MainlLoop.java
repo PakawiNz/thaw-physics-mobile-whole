@@ -58,10 +58,13 @@ public class MainlLoop implements Runnable {
             testColoring[i] = (byte)((i/20)%4 + 1);
         }
 
-        if (true){
+        if (false){
             debugImg.drawImage(testColoring);
             debugImg.invalidate();
         }
+
+        outString += sensorInterface.getAccelero() + "\n";
+        outString += sensorInterface.getYAngle() + "\n";
 
 		// NOTE: execute Control
 		debugText.setText(outString);

@@ -37,4 +37,17 @@ public class SensorInterface implements SensorEventListener {
 		acc[1] = event.values[1];
 		acc[2] = event.values[2];
 	}
+
+    public String getAccelero(){
+        return "x:" + acc[0] + " y:" + acc[1] + " z:" +acc[2];
+    }
+
+    public String getYAngle(){
+        double sum = Math.sqrt(
+                Math.pow(acc[0],2)+
+                Math.pow(acc[1],2)+
+                Math.pow(acc[2],2));
+
+        return "sum:" + sum;
+    }
 }

@@ -51,7 +51,7 @@ public class KookKaiDroidActivity extends Activity {
 		debugImgview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		FrameLayout cameraFrame = new FrameLayout(this);
-		cameraFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		cameraFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 500));
 		cameraFrame.addView(cameraInterface);
 		cameraFrame.addView(debugImgview);
 
