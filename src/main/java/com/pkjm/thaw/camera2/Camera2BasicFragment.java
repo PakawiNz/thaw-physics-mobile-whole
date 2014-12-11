@@ -183,11 +183,9 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
     public static Camera2BasicFragment newInstance(SharedPreferences prefs) {
         Camera2BasicFragment fragment = new Camera2BasicFragment();
 
-        int text_exposure = Integer.parseInt((prefs.getString("text_exposure","2")));
-        Log.d("noob", "" + text_exposure);
         fragment.setRetainInstance(true);
         fragment.prefs = prefs;
-        prefs.registerOnSharedPreferenceChangeListener(fragment);
+        // prefs.registerOnSharedPreferenceChangeListener(fragment);
         return fragment;
     }
 
@@ -199,7 +197,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
-//        mTextureView = new AutoFitTextureView(view.getContext());
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     }
 
@@ -278,9 +275,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
         }
     }
 
-    /**
-     * Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
-     */
     private void openCamera(int width, int height) {
         setUpCameraOutputs(width, height);
         configureTransform(width, height);
@@ -298,9 +292,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
         }
     }
 
-    /**
-     * Closes the current {@link android.hardware.camera2.CameraDevice}.
-     */
     private void closeCamera() {
         try {
             mCameraOpenCloseLock.acquire();
@@ -340,6 +331,11 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
         }
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        
+    }
+
     private void createCameraPreviewSession() {
         try {
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -358,52 +354,61 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
 
             // Here, we create a CameraCaptureSession for camera preview.
             mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()),
-                    new CameraCaptureSession.StateCallback() {
+                new CameraCaptureSession.StateCallback() {
 
-                        @Override
-                        public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                            if (null == mCameraDevice) {
-                                return;
-                            }
+                    @Override
+                    public void onConfigured(CameraCaptureSession cameraCaptureSession) {
+                        if (null == mCameraDevice)
+                            return;
 
-                            mCaptureSession = cameraCaptureSession;
-                            try {
+                        int text_exposure = Integer.parseInt((prefs.getString("text_exposure","2")));
+                        boolean check_ae_lock = Boolean.parseBoolean((prefs.getString("check_ae_lock","true")));
+                        boolean check_af_lock = Boolean.parseBoolean((prefs.getString("check_af_lock","true")));
 
+                        mCaptureSession = cameraCaptureSession;
+                        try {
+
+                            // Setting up camera parameter
+                            if(check_af_lock){
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                         CaptureRequest.CONTROL_AF_MODE_OFF);
-
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                                        CaptureRequest.CONTROL_AE_MODE_ON);
-
-                                mPreviewRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE,
-                                        characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE));
-
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
-                                        2);
-
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK,
-                                        true);
-
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,
-                                        true);
-
-                                // Finally, we start displaying the camera preview.
-                                mPreviewRequest = mPreviewRequestBuilder.build();
-                                mCaptureSession.setRepeatingRequest(mPreviewRequest,
-                                        mCaptureCallback, mBackgroundHandler);
-                            } catch (CameraAccessException e) {
-                                e.printStackTrace();
+                            }else{
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                                        CaptureRequest.CONTROL_AF_MODE_AUTO);
                             }
-                        }
 
-                        @Override
-                        public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-                            Activity activity = getActivity();
-                            if (null != activity) {
-                                Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
-                            }
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
+                                    CaptureRequest.CONTROL_AE_MODE_ON);
+
+                            mPreviewRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE,
+                                    characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE));
+
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
+                                    text_exposure);
+
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK,
+                                    check_ae_lock);
+
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,
+                                    true);
+
+                            // Finally, we start displaying the camera preview.
+                            mPreviewRequest = mPreviewRequestBuilder.build();
+                            mCaptureSession.setRepeatingRequest(mPreviewRequest,
+                                    mCaptureCallback, mBackgroundHandler);
+                        } catch (CameraAccessException e) {
+                            e.printStackTrace();
                         }
-                    }, null
+                    }
+
+                    @Override
+                    public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
+                        Activity activity = getActivity();
+                        if (null != activity) {
+                            Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, null
             );
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -431,11 +436,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
             matrix.postRotate(90 * (rotation - 2), centerX, centerY);
         }
         mTextureView.setTransform(matrix);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        
     }
 
     static class CompareSizesByArea implements Comparator<Size> {
@@ -466,8 +466,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
         }
 
     }
-
-
 
     public AutoFitTextureView getTextureView() {
         return mTextureView;

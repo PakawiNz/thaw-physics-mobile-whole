@@ -45,6 +45,11 @@ public class ThawActivity extends Activity {
                     .replace(R.id.container, fragment)
                     .commit();
         }
+        boolean check_hide_camera = Boolean.parseBoolean((prefs.getString("check_hide_camera","false")));
+        if (check_hide_camera) {
+            findViewById(R.id.surfaceView).setVisibility(View.VISIBLE);
+        }
+
         TextView debugText = (TextView)findViewById(R.id.debug);
         Button showColorBtn = (Button)findViewById(R.id.showColor);
         this.analyser = new Analyser(this,fragment,debugText,showColorBtn);

@@ -11,21 +11,21 @@
             android:summary="" />
 
         <CheckBoxPreference
+            android:key="check_af_lock"
+            android:title="AF LOCK"
+            android:summary="Turn off Camera's Autofocus Lens Distance" />
+
+        <CheckBoxPreference
             android:key="check_ae_lock"
             android:title="AE LOCK"
-            android:summary="" />
+            android:summary="Turn off Camera's Autoadjust Exposure Compensation" />
 
         <EditTextPreference
             android:key="text_exposure"
             android:dependency="check_ae_lock"
             android:title="Adjust Exposure Level"
             android:dialogTitle="Adjust Exposure Level"
-            android:summary="" />
-
-        <CheckBoxPreference
-            android:key="check_af_lock"
-            android:title="AF LOCK"
-            android:summary="" />
+            android:summary="Manually adjust Exposure Compensation" />
 
     </PreferenceCategory>
 
