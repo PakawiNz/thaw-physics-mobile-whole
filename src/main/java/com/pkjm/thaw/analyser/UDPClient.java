@@ -67,15 +67,13 @@ public class UDPClient implements Runnable {
 		this.isRunning = false;
 	}
 
-	private void sendMessage(byte[] bytes) {
-		//Log.d("client_sendMessage", "BYTE = " + MessageBundle.byteToString(bytes[2]) + ", " + MessageBundle.byteToString(bytes[1]) + ", " + MessageBundle.byteToString(bytes[0]));
+	public void sendMessage(byte[] bytes) {
 		try {
 			if(this.isRunning) {
 				this.isRunning = false;
 				while(this.thread.isAlive());
 			}
 			this.bytes = bytes;
-//			Log.d("Comm_Client", "New Thread");
 			thread = new Thread(this, "Client Thread");
 			thread.start();
 		} catch (Exception e) { return; }

@@ -51,7 +51,10 @@ public class SensorInterface implements SensorEventListener {
         return "x:" + acc[0] + " y:" + acc[1] + " z:" +acc[2];
     }
 
-    public String getDeviceAngle() {
-        return "" + String.format("%3.1f",Math.toDegrees(deviceAngle) + 180);
+    public int getDeviceAngle(byte[] udpout) {
+        int degrees = (int)((Math.toDegrees(deviceAngle) + 180)*10);
+        udpout[3] = (byte)(degrees/100);
+        udpout[4] = (byte)(degrees%100);
+        return degrees;
     }
 }

@@ -17,21 +17,29 @@
 package com.pkjm.thaw;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.pkjm.thaw.analyser.ColorAnalyser;
+import com.pkjm.thaw.analyser.Analyser;
+import com.pkjm.thaw.camera2.Camera2BasicFragment;
 
-public class CameraActivity extends Activity {
+public class ThawActivity extends Activity {
 
-    ColorAnalyser analyser;
+    Analyser analyser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-        Camera2BasicFragment fragment = Camera2BasicFragment.newInstance();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Camera2BasicFragment fragment = Camera2BasicFragment.newInstance(prefs);
         if (null == savedInstanceState) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, fragment)
@@ -39,8 +47,9 @@ public class CameraActivity extends Activity {
         }
         TextView debugText = (TextView)findViewById(R.id.debug);
         Button showColorBtn = (Button)findViewById(R.id.showColor);
-        this.analyser = new ColorAnalyser(this,debugText,showColorBtn,fragment);
+        this.analyser = new Analyser(this,fragment,debugText,showColorBtn);
     }
+
 
     @Override
     public void onStart() {
@@ -57,6 +66,11 @@ public class CameraActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         analyser.stop();
+    }
+
+    public void goSetting(View view){
+        Intent intent = new Intent(getApplicationContext(),FragmentPreferences.class);
+        startActivity(intent);
     }
 
 }

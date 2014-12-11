@@ -1,4 +1,4 @@
-package com.pkjm.thaw;
+package com.pkjm.thaw.camera2;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,6 +7,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
@@ -34,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.pkjm.thaw.R;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,19 +45,11 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class Camera2BasicFragment extends Fragment {
+public class Camera2BasicFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "Camera2BasicFragment";
 
     private static final int STATE_PREVIEW = 0;
-
-    private static final int STATE_WAITING_LOCK = 1;
-
-    private static final int STATE_WAITING_PRECAPTURE = 2;
-
-    private static final int STATE_WAITING_NON_PRECAPTURE = 3;
-
-    private static final int STATE_PICTURE_TAKEN = 4;
 
     private final TextureView.SurfaceTextureListener mSurfaceTextureListener
             = new TextureView.SurfaceTextureListener() {
@@ -136,6 +131,7 @@ public class Camera2BasicFragment extends Fragment {
 
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
+    private SharedPreferences prefs;
 
     private CameraCaptureSession.CaptureCallback mCaptureCallback
             = new CameraCaptureSession.CaptureCallback() {
@@ -184,9 +180,14 @@ public class Camera2BasicFragment extends Fragment {
         }
     }
 
-    public static Camera2BasicFragment newInstance() {
+    public static Camera2BasicFragment newInstance(SharedPreferences prefs) {
         Camera2BasicFragment fragment = new Camera2BasicFragment();
+
+        int text_exposure = Integer.parseInt((prefs.getString("text_exposure","2")));
+        Log.d("noob", "" + text_exposure);
         fragment.setRetainInstance(true);
+        fragment.prefs = prefs;
+        prefs.registerOnSharedPreferenceChangeListener(fragment);
         return fragment;
     }
 
@@ -198,6 +199,7 @@ public class Camera2BasicFragment extends Fragment {
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
+//        mTextureView = new AutoFitTextureView(view.getContext());
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     }
 
@@ -321,18 +323,12 @@ public class Camera2BasicFragment extends Fragment {
         }
     }
 
-    /**
-     * Starts a background thread and its {@link android.os.Handler}.
-     */
     private void startBackgroundThread() {
         mBackgroundThread = new HandlerThread("CameraBackground");
         mBackgroundThread.start();
         mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
     }
 
-    /**
-     * Stops the background thread and its {@link android.os.Handler}.
-     */
     private void stopBackgroundThread() {
         mBackgroundThread.quitSafely();
         try {
@@ -344,9 +340,6 @@ public class Camera2BasicFragment extends Fragment {
         }
     }
 
-    /**
-     * Creates a new {@link android.hardware.camera2.CameraCaptureSession} for camera preview.
-     */
     private void createCameraPreviewSession() {
         try {
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -369,12 +362,10 @@ public class Camera2BasicFragment extends Fragment {
 
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                            // The camera is already closed
                             if (null == mCameraDevice) {
                                 return;
                             }
 
-                            // When the session is ready, we start displaying the preview.
                             mCaptureSession = cameraCaptureSession;
                             try {
 
@@ -385,21 +376,16 @@ public class Camera2BasicFragment extends Fragment {
                                         CaptureRequest.CONTROL_AE_MODE_ON);
 
                                 mPreviewRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE,
-                                        (float)14.285714);
+                                        characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE));
 
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
-                                        12);
+                                        2);
 
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK,
                                         true);
 
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,
                                         true);
-
-//                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-//                                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-//                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-//                                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build();
@@ -424,14 +410,6 @@ public class Camera2BasicFragment extends Fragment {
         }
     }
 
-    /**
-     * Configures the necessary {@link android.graphics.Matrix} transformation to `mTextureView`.
-     * This method should be called after the camera preview size is determined in
-     * setUpCameraOutputs and also the size of `mTextureView` is fixed.
-     *
-     * @param viewWidth  The width of `mTextureView`
-     * @param viewHeight The height of `mTextureView`
-     */
     private void configureTransform(int viewWidth, int viewHeight) {
         Activity activity = getActivity();
         if (null == mTextureView || null == mPreviewSize || null == activity) {
@@ -455,18 +433,9 @@ public class Camera2BasicFragment extends Fragment {
         mTextureView.setTransform(matrix);
     }
 
-    private void runPrecaptureSequence() {
-        try {
-            // This is how to tell the camera to trigger.
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
-                    CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
-            mState = STATE_WAITING_PRECAPTURE;
-            mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
-                    mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        
     }
 
     static class CompareSizesByArea implements Comparator<Size> {
@@ -498,7 +467,9 @@ public class Camera2BasicFragment extends Fragment {
 
     }
 
-    public AutoFitTextureView getmTextureView() {
+
+
+    public AutoFitTextureView getTextureView() {
         return mTextureView;
     }
 }

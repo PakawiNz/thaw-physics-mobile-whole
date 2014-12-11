@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="Thaw Physics Mobile">
+            
+        <CheckBoxPreference
+            android:key="check_hide_camera"
+            android:title="Hide Camera View"
+            android:summary="" />
+
+        <CheckBoxPreference
+            android:key="check_ae_lock"
+            android:title="AE LOCK"
+            android:summary="" />
+
+        <EditTextPreference
+            android:key="text_exposure"
+            android:dependency="check_ae_lock"
+            android:title="Adjust Exposure Level"
+            android:dialogTitle="Adjust Exposure Level"
+            android:summary="" />
+
+        <CheckBoxPreference
+            android:key="check_af_lock"
+            android:title="AF LOCK"
+            android:summary="" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
+

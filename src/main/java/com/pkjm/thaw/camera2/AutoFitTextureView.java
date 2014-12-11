@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pkjm.thaw;
+package com.pkjm.thaw.camera2;
 
 import android.content.Context;
 import android.util.AttributeSet;
