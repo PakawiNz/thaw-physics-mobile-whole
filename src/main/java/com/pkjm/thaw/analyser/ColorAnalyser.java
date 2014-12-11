@@ -74,7 +74,13 @@ public class ColorAnalyser {
             udpout[8] = (byte) state;
         }catch (Exception e){
             Log.d("thaw-calc-color", "can't get bitmap");
-      color & 0x00FF0000) >> 16;
+        }finally {
+            return color;
+        }
+    }
+
+    private void colorToRGB(int color,byte[] rgb){
+        rgb[0] = (color & 0x00FF0000) >> 16;
         rgb[1] = (color & 0x0000FF00) >> 8;
         rgb[2] = (color & 0x000000FF) >> 0;
     }
