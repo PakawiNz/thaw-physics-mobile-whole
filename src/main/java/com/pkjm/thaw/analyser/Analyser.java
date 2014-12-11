@@ -19,6 +19,7 @@ public class Analyser implements Runnable {
     TextView debugText;
     Button showColorBtn;
 
+    private byte[] udpout = new byte[10];
     UDPClient client;
 
     public Analyser(Activity activity,Camera2BasicFragment fragment,TextView debugText,Button showColorBtn) {
@@ -34,7 +35,6 @@ public class Analyser implements Runnable {
         return b & 0xFF;
     }
 
-    private byte[] udpout = new byte[5];
     public void run() {
         long timeStamp = System.currentTimeMillis();
 
