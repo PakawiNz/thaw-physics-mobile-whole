@@ -59,7 +59,7 @@ public class ColorAnalyser {
                         sumWhiteY += j - cy;
                         whitePixelCount++;
 
-                        pixelDrawer.draw(i,j,Color.WHITE);
+                        pixelDrawer.draw(i,j,Color.RED);
                     }else {
                         pixelDrawer.draw(i,j,color);
                     }
@@ -89,10 +89,13 @@ public class ColorAnalyser {
                 udpout[5] = 0;
                 udpout[6] = 0;
             } else {
-                Log.d("thaw-sumwhite", "X:" + ((sumWhiteX / sumWhiteScale) * 128));
-                Log.d("thaw-sumwhite", "Y:" + ((sumWhiteY / sumWhiteScale) * 128));
+//                Log.d("thaw-sumwhite", "X:" + ((sumWhiteX / sumWhiteScale) * 128));
+//                Log.d("thaw-sumwhite", "Y:" + ((sumWhiteY / sumWhiteScale) * 128));
+                double whiteangle = Math.toDegrees(Math.atan2(sumWhiteY,sumWhiteX));
+                Log.d("thaw-sumwhite", "Deg:" + whiteangle);
                 udpout[5] = (byte) (((sumWhiteX/sumWhiteScale) * 128) + 128);
                 udpout[6] = (byte) (((sumWhiteY/sumWhiteScale) * 128) + 128);
+
             }
             colorToRGB(color,udpout);
             udpout[7] = (byte) pixelAmount;
