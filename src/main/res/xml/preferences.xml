@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-            android:title="Thaw Physics Mobile">
+            android:title="Camera2 API">
             
         <CheckBoxPreference
             android:key="check_hide_camera"
@@ -26,6 +26,31 @@
             android:title="Adjust Exposure Level"
             android:dialogTitle="Adjust Exposure Level"
             android:summary="Manually adjust Exposure Compensation" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Connection Data">
+
+        <CheckBoxPreference
+            android:key="check_autohost"
+            android:disableDependentsState="true"
+            android:title="Auto Find Host"
+            android:summary="Turn on automatic host finding." />
+
+        <EditTextPreference
+            android:key="text_ipv4"
+            android:dependency="check_autohost"
+            android:title="IP Address"
+            android:dialogTitle="IP Address"
+            android:summary="IP Address of Host Machine" />
+
+        <EditTextPreference
+            android:key="text_port"
+            android:dependency="check_autohost"
+            android:title="Port"
+            android:dialogTitle="Port"
+            android:summary="Port of Listening Software" />
 
     </PreferenceCategory>
 

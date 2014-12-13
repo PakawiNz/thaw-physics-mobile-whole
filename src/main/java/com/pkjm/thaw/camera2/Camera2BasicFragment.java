@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class Camera2BasicFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class Camera2BasicFragment extends Fragment {
 
     private static final String TAG = "Camera2BasicFragment";
 
@@ -75,17 +76,7 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
 
     };
 
-    private String mCameraId;
-
-    private AutoFitTextureView mTextureView;
-
-    private CameraCaptureSession mCaptureSession;
-
-    private CameraDevice mCameraDevice;
-
-    private CameraCharacteristics characteristics;
-
-    private Size mPreviewSize;
+    private TextureView upper_texture;
 
     private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
 
@@ -117,6 +108,18 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
 
     };
 
+    private String mCameraId;
+
+    private AutoFitTextureView mTextureView;
+
+    private CameraCaptureSession mCaptureSession;
+
+    private CameraDevice mCameraDevice;
+
+    private CameraCharacteristics characteristics;
+
+    private Size mPreviewSize;
+
     private HandlerThread mBackgroundThread;
 
     private Handler mBackgroundHandler;
@@ -130,6 +133,8 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
     private int mState = STATE_PREVIEW;
 
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
+
+    private Surface surface;
 
     private SharedPreferences prefs;
 
@@ -198,6 +203,14 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+        upper_texture = (TextureView) view.findViewById(R.id.upper_texture);
+
+        boolean check_hide_camera = prefs.getBoolean("check_hide_camera", false);
+        if (check_hide_camera) {
+            upper_texture.setVisibility(View.VISIBLE);
+        }else {
+            upper_texture.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -331,11 +344,6 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        
-    }
-
     private void createCameraPreviewSession() {
         try {
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -345,7 +353,7 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
 
             // This is the output Surface we need to start preview.
-            Surface surface = new Surface(texture);
+            surface = new Surface(texture);
 
             // We set up a CaptureRequest.Builder with the output Surface.
             mPreviewRequestBuilder
@@ -353,7 +361,48 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
             mPreviewRequestBuilder.addTarget(surface);
 
             // Here, we create a CameraCaptureSession for camera preview.
-            mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()),
+            createCaptureSession();
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void configureTransform(int viewWidth, int viewHeight) {
+        Activity activity = getActivity();
+        if (null == mTextureView || null == mPreviewSize || null == activity) {
+            return;
+        }
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        Matrix matrix = new Matrix();
+        RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
+        RectF bufferRect = new RectF(0, 0, mPreviewSize.getHeight(), mPreviewSize.getWidth());
+        float centerX = viewRect.centerX();
+        float centerY = viewRect.centerY();
+        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
+            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
+            float scale = Math.max(
+                    (float) viewHeight / mPreviewSize.getHeight(),
+                    (float) viewWidth / mPreviewSize.getWidth());
+            matrix.postScale(scale, scale, centerX, centerY);
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
+        }
+        mTextureView.setTransform(matrix);
+    }
+
+    static class CompareSizesByArea implements Comparator<Size> {
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            // We cast here to ensure the multiplications won't overflow
+            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
+                    (long) rhs.getWidth() * rhs.getHeight());
+        }
+
+    }
+
+    private void createCaptureSession() throws CameraAccessException {
+        mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()),
                 new CameraCaptureSession.StateCallback() {
 
                     @Override
@@ -362,8 +411,8 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
                             return;
 
                         int text_exposure = Integer.parseInt((prefs.getString("text_exposure","2")));
-                        boolean check_ae_lock = Boolean.parseBoolean((prefs.getString("check_ae_lock","true")));
-                        boolean check_af_lock = Boolean.parseBoolean((prefs.getString("check_af_lock","true")));
+                        boolean check_ae_lock = prefs.getBoolean("check_ae_lock",true);
+                        boolean check_af_lock = prefs.getBoolean("check_af_lock",true);
 
                         mCaptureSession = cameraCaptureSession;
                         try {
@@ -409,44 +458,7 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
                         }
                     }
                 }, null
-            );
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void configureTransform(int viewWidth, int viewHeight) {
-        Activity activity = getActivity();
-        if (null == mTextureView || null == mPreviewSize || null == activity) {
-            return;
-        }
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-        Matrix matrix = new Matrix();
-        RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
-        RectF bufferRect = new RectF(0, 0, mPreviewSize.getHeight(), mPreviewSize.getWidth());
-        float centerX = viewRect.centerX();
-        float centerY = viewRect.centerY();
-        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
-            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
-            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
-            float scale = Math.max(
-                    (float) viewHeight / mPreviewSize.getHeight(),
-                    (float) viewWidth / mPreviewSize.getWidth());
-            matrix.postScale(scale, scale, centerX, centerY);
-            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
-        }
-        mTextureView.setTransform(matrix);
-    }
-
-    static class CompareSizesByArea implements Comparator<Size> {
-
-        @Override
-        public int compare(Size lhs, Size rhs) {
-            // We cast here to ensure the multiplications won't overflow
-            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
-                    (long) rhs.getWidth() * rhs.getHeight());
-        }
-
+        );
     }
 
     public static class ErrorDialog extends DialogFragment {
@@ -469,5 +481,9 @@ public class Camera2BasicFragment extends Fragment implements SharedPreferences.
 
     public AutoFitTextureView getTextureView() {
         return mTextureView;
+    }
+
+    public TextureView getUpperTextureView() {
+        return upper_texture;
     }
 }

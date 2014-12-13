@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,28 +30,36 @@ import com.pkjm.thaw.camera2.Camera2BasicFragment;
 
 public class ThawActivity extends Activity {
 
-    Analyser analyser;
+    public static ThawActivity activity;
+    private Analyser analyser;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        activity = this;
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Camera2BasicFragment fragment = Camera2BasicFragment.newInstance(prefs);
         if (null == savedInstanceState) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, fragment)
                     .commit();
         }
-        boolean check_hide_camera = Boolean.parseBoolean((prefs.getString("check_hide_camera","false")));
-        if (check_hide_camera) {
-            findViewById(R.id.surfaceView).setVisibility(View.VISIBLE);
-        }
 
         TextView debugText = (TextView)findViewById(R.id.debug);
         Button showColorBtn = (Button)findViewById(R.id.showColor);
-        this.analyser = new Analyser(this,fragment,debugText,showColorBtn);
+        this.analyser = new Analyser(this,prefs,fragment,debugText,showColorBtn);
+
+        prefs.registerOnSharedPreferenceChangeListener(
+                new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(
+                    SharedPreferences sharedPreferences, String key) {
+
+            }
+        });
     }
 
 
@@ -73,9 +80,19 @@ public class ThawActivity extends Activity {
         analyser.stop();
     }
 
+    public void restart(View view){
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+    }
+
     public void goSetting(View view){
         Intent intent = new Intent(getApplicationContext(),FragmentPreferences.class);
         startActivity(intent);
+    }
+
+    public SharedPreferences getPreferences(){
+        return prefs;
     }
 
 }

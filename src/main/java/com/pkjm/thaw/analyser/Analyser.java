@@ -1,6 +1,7 @@
 package com.pkjm.thaw.analyser;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,13 +23,18 @@ public class Analyser implements Runnable {
     private byte[] udpout = new byte[10];
     UDPClient client;
 
-    public Analyser(Activity activity,Camera2BasicFragment fragment,TextView debugText,Button showColorBtn) {
+    public Analyser(Activity activity,SharedPreferences prefs,Camera2BasicFragment fragment,TextView debugText,Button showColorBtn) {
         this.sensorInterface = new SensorInterface(activity);
         this.colorAnalyser = new ColorAnalyser(fragment);
         this.debugText = debugText;
         this.showColorBtn = showColorBtn;
-        this.client = new UDPClient(6437);
-        client.add("192.168.1.33");
+
+        boolean check_autohost = prefs.getBoolean("check_autohost",false);
+        int port = Integer.parseInt(prefs.getString("text_port","6437"));
+        String ipv4 = prefs.getString("text_ipv4","192.168.1.0");
+
+        this.client = new UDPClient(port);
+        this.client.add(ipv4);
     }
 
     public static int byte2uint(byte b) {

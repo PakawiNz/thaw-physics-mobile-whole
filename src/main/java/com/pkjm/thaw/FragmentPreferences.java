@@ -35,6 +35,11 @@ public class FragmentPreferences extends Activity {
                 new PrefsFragment()).commit();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ThawActivity.activity.restart(null);
+    }
 
     public static class PrefsFragment extends PreferenceFragment {
 
