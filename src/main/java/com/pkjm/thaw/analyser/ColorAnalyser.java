@@ -23,6 +23,46 @@ public class ColorAnalyser {
     private final int stepSize = 30;
     private int[] rgb = new int[3];
     private float[] hsv = new float[3];
+    private float calS;
+    private float calV;
+
+    public void whiteCal(){
+        int color = 0;
+
+        if(!fragment.getTextureView().isAvailable()) return;
+        try {
+            Bitmap bitmap = fragment.getTextureView().getBitmap();
+            int cx = bitmap.getWidth() / 2;
+            int cy = bitmap.getHeight() / 2;
+            double count = 0;
+            double sumR = 0, sumG = 0, sumB = 0, adj = 1;
+
+            pixelDrawer.init(fragment.getUpperTextureView());
+            for (int i = cx - spanSize; i <= cx + spanSize; i += stepSize) {
+                for (int j = cy - spanSize; j <= cy + spanSize; j += stepSize) {
+                    color = bitmap.getPixel(i, j);
+                    colorToRGBint(color, rgb);
+                    sumR += rgb[0] * adj;
+                    sumG += rgb[1] * adj;
+                    sumB += rgb[2] * adj;
+                    count += adj;
+                    pixelDrawer.draw(i,j,color);
+                }
+            }
+            pixelDrawer.post();
+
+            rgb[0] = (int)(sumR / count);
+            rgb[1] = (int)(sumG / count);
+            rgb[2] = (int)(sumB / count);
+            color = RGBToColor(rgb);
+
+            Color.colorToHSV(color,hsv);
+            calS = hsv[1];
+            calV = hsv[2];
+        }catch (Exception e){
+
+        }
+    }
 
     public int getCalcColor(byte[] udpout){
         int color = 0;
@@ -39,15 +79,11 @@ public class ColorAnalyser {
             int sumWhiteX = 0;
             int sumWhiteY = 0;
 
-            // double maxrange = Math.sqrt(Math.pow(spanSize/2,2) + Math.pow(spanSize/2,2));
-
             pixelDrawer.init(fragment.getUpperTextureView());
             for (int i = cx-spanSize; i <= cx+spanSize; i += stepSize){
                 for (int j = cy-spanSize; j <= cy+spanSize; j += stepSize){
                     color = bitmap.getPixel(i, j);
                     colorToRGBint(color, rgb);
-                    // adj = maxrange - Math.sqrt(Math.pow(i-cx,2) + Math.pow(j-cy,2));
-                    // adj /= maxrange;
                     sumR += rgb[0]*adj;
                     sumG += rgb[1]*adj;
                     sumB += rgb[2]*adj;
@@ -55,15 +91,13 @@ public class ColorAnalyser {
 
                     Color.colorToHSV(color,hsv);
 
-                    if (hsv[1] < 0.2 && hsv[2] > 0.4){
+                    if (hsv[1] < calS && hsv[2] > calV){
                         sumWhiteX += i - cx;
                         sumWhiteY += j - cy;
                         whitePixelCount++;
                         pixelDrawer.draw(i,j,Color.BLUE);
                     }
                     else if (rgb[0] > 140 && rgb[1] > 140 && rgb[2] > 140) {
-//                        Log.d("rgb-color",String.format("%03d %03d %03d",rgb[0],rgb[1],rgb[2]));
-//                        Log.d("thaw-sumwhite","X:" + sumWhiteX);
                         pixelDrawer.draw(i,j,Color.RED);
                     }else {
                         pixelDrawer.draw(i,j,color);
@@ -93,8 +127,6 @@ public class ColorAnalyser {
                 udpout[5] = 0;
                 udpout[6] = 0;
             } else {
-//                Log.d("thaw-sumwhite", "X:" + ((sumWhiteX / sumWhiteScale) * 128));
-//                Log.d("thaw-sumwhite", "Y:" + ((sumWhiteY / sumWhiteScale) * 128));
                 double whiteangle = Math.toDegrees(Math.atan2(sumWhiteY,sumWhiteX));
                 Log.d("thaw-sumwhite", "Deg:" + whiteangle);
                 udpout[5] = (byte) (((sumWhiteX/sumWhiteScale) * 128) + 128);

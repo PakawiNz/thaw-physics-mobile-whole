@@ -1,12 +1,10 @@
 package com.pkjm.thaw.analyser;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -45,17 +43,38 @@ public class Analyser implements Runnable {
         return b & 0xFF;
     }
 
+    private boolean isCalibrating = true;
+    public void endCalibration(){
+        isCalibrating = false;
+    }
+
     private boolean isBlock = false;
     public boolean swapBlState(){
         isBlock = !isBlock;
         return isBlock;
     }
 
-    private String outString;
     public void run() {
+
         long timeStamp = System.currentTimeMillis();
 
-        outString = "";
+        if(isCalibrating){
+            colorAnalyser.whiteCal();
+        }else{
+            normalflow();
+        }
+
+        long timeDiff = System.currentTimeMillis() - timeStamp;
+
+        if (timeDiff < 90)
+            handler.postDelayed(this, 100 - timeDiff);
+        else
+            handler.postDelayed(this, 10);
+    }
+
+    private void normalflow(){
+
+        String outString = "";
 
         int color = colorAnalyser.getCalcColor(udpout);
         int angle = sensorInterface.getDeviceAngle(udpout);
@@ -80,13 +99,6 @@ public class Analyser implements Runnable {
 
         debugText.setText(outString);
         client.sendMessage(udpout);
-
-        long timeDiff = System.currentTimeMillis() - timeStamp;
-
-        if (timeDiff < 90)
-            handler.postDelayed(this, 100 - timeDiff);
-        else
-            handler.postDelayed(this, 10);
     }
 
     public void start() {
