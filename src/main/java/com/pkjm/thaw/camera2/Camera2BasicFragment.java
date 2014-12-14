@@ -136,7 +136,9 @@ public class Camera2BasicFragment extends Fragment {
 
     private Surface surface;
 
-    private SharedPreferences prefs;
+    private int text_exposure;
+    private boolean check_ae_lock;
+    private boolean check_af_lock;
 
     private CameraCaptureSession.CaptureCallback mCaptureCallback
             = new CameraCaptureSession.CaptureCallback() {
@@ -185,11 +187,18 @@ public class Camera2BasicFragment extends Fragment {
         }
     }
 
-    public static Camera2BasicFragment newInstance(SharedPreferences prefs) {
-        Camera2BasicFragment fragment = new Camera2BasicFragment();
+    public static Camera2BasicFragment newInstance(
+            int text_exposure,
+            boolean check_ae_lock,
+            boolean check_af_lock
+    ) {
 
+        Camera2BasicFragment fragment = new Camera2BasicFragment();
         fragment.setRetainInstance(true);
-        fragment.prefs = prefs;
+        fragment.text_exposure = text_exposure;
+        fragment.check_ae_lock = check_ae_lock;
+        fragment.check_af_lock = check_af_lock;
+
         // prefs.registerOnSharedPreferenceChangeListener(fragment);
         return fragment;
     }
@@ -204,13 +213,6 @@ public class Camera2BasicFragment extends Fragment {
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
         upper_texture = (TextureView) view.findViewById(R.id.upper_texture);
-
-        boolean check_hide_camera = prefs.getBoolean("check_hide_camera", false);
-        if (check_hide_camera) {
-            upper_texture.setVisibility(View.VISIBLE);
-        }else {
-            upper_texture.setVisibility(View.INVISIBLE);
-        }
     }
 
     @Override
@@ -409,10 +411,6 @@ public class Camera2BasicFragment extends Fragment {
                     public void onConfigured(CameraCaptureSession cameraCaptureSession) {
                         if (null == mCameraDevice)
                             return;
-
-                        int text_exposure = Integer.parseInt((prefs.getString("text_exposure","2")));
-                        boolean check_ae_lock = prefs.getBoolean("check_ae_lock",true);
-                        boolean check_af_lock = prefs.getBoolean("check_af_lock",true);
 
                         mCaptureSession = cameraCaptureSession;
                         try {

@@ -6,8 +6,8 @@
             android:title="Camera2 API">
             
         <CheckBoxPreference
-            android:key="check_hide_camera"
-            android:title="Hide Camera View"
+            android:key="check_debug"
+            android:title="Show Debug View"
             android:summary="" />
 
         <CheckBoxPreference

@@ -2,7 +2,11 @@ package com.pkjm.thaw.analyser;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -14,33 +18,40 @@ import com.pkjm.thaw.camera2.Camera2BasicFragment;
 public class Analyser implements Runnable {
 
     private final Handler handler = new Handler();
-    SensorInterface sensorInterface;
-    ColorAnalyser colorAnalyser;
-    String outString;
-    TextView debugText;
-    Button showColorBtn;
+    private SensorInterface sensorInterface;
+    private ColorAnalyser colorAnalyser;
+    private TextView debugText;
+    private Button showColorBtn;
+    private boolean check_debug;
 
     private byte[] udpout = new byte[10];
-    UDPClient client;
+    private UDPClient client;
 
-    public Analyser(Activity activity,SharedPreferences prefs,Camera2BasicFragment fragment,TextView debugText,Button showColorBtn) {
+    public Analyser(Activity activity,Camera2BasicFragment fragment,
+        TextView debugText,Button showColorBtn,
+        boolean check_debug,String ipv4,int port) {
+
         this.sensorInterface = new SensorInterface(activity);
         this.colorAnalyser = new ColorAnalyser(fragment);
         this.debugText = debugText;
         this.showColorBtn = showColorBtn;
 
-        boolean check_autohost = prefs.getBoolean("check_autohost",false);
-        int port = Integer.parseInt(prefs.getString("text_port","6437"));
-        String ipv4 = prefs.getString("text_ipv4","192.168.1.0");
-
+        this.check_debug = check_debug;
         this.client = new UDPClient(port);
         this.client.add(ipv4);
     }
 
-    public static int byte2uint(byte b) {
+    private static int byte2uint(byte b) {
         return b & 0xFF;
     }
 
+    private boolean isBlock = false;
+    public boolean swapBlState(){
+        isBlock = !isBlock;
+        return isBlock;
+    }
+
+    private String outString;
     public void run() {
         long timeStamp = System.currentTimeMillis();
 
@@ -48,13 +59,24 @@ public class Analyser implements Runnable {
 
         int color = colorAnalyser.getCalcColor(udpout);
         int angle = sensorInterface.getDeviceAngle(udpout);
+        udpout[9] = (byte)(isBlock ? 1 : 0);
 
-        showColorBtn.setBackgroundColor(color);
+        for (Drawable drawable : showColorBtn.getCompoundDrawables()){
+            if (drawable == null) continue;
+
+            if (check_debug)
+                drawable.mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN );
+            else
+                drawable.mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN );
+        }
+        if (check_debug)
+            showColorBtn.setBackgroundColor(color);
 
         outString += String.format("[%03d,%03d,%03d],",
                 byte2uint(udpout[0]),byte2uint(udpout[1]),byte2uint(udpout[2]));
         outString += String.format("[%02d%02d],",
                 byte2uint(udpout[3]),byte2uint(udpout[4]));
+        outString += "" + isBlock + ",";
 
         debugText.setText(outString);
         client.sendMessage(udpout);

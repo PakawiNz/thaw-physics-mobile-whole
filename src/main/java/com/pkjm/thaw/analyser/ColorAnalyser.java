@@ -128,15 +128,15 @@ public class ColorAnalyser {
         return out;
     }
 
-    private final int pixelSize = 10;
     class PixelDrawer{
+        private final int pixelSize = 10;
         private Canvas canvas;
         private Paint paint;
         private TextureView textureView;
 
         public void init(TextureView textureView){
+            this.textureView = textureView;
             try {
-                this.textureView = textureView;
                 canvas = textureView.lockCanvas();
                 canvas.drawColor(0xff000000, PorterDuff.Mode.CLEAR);
                 paint = new Paint();
@@ -154,7 +154,7 @@ public class ColorAnalyser {
 
         public void post(){
             try {
-                fragment.getUpperTextureView().unlockCanvasAndPost(canvas);
+                textureView.unlockCanvasAndPost(canvas);
             }catch(Exception e) {}
         }
     }
