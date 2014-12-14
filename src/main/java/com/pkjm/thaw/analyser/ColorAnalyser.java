@@ -22,6 +22,7 @@ public class ColorAnalyser {
     private final int spanSize = 300;
     private final int stepSize = 30;
     private int[] rgb = new int[3];
+    private float[] hsv = new float[3];
 
     public int getCalcColor(byte[] udpout){
         int color = 0;
@@ -52,13 +53,17 @@ public class ColorAnalyser {
                     sumB += rgb[2]*adj;
                     count += adj;
 
-                    if (rgb[0] > 140 && rgb[1] > 140 && rgb[2] > 140) {
-//                        Log.d("rgb-color",String.format("%03d %03d %03d",rgb[0],rgb[1],rgb[2]));
-//                        Log.d("thaw-sumwhite","X:" + sumWhiteX);
+                    Color.colorToHSV(color,hsv);
+
+                    if (hsv[1] < 0.2 && hsv[2] > 0.4){
                         sumWhiteX += i - cx;
                         sumWhiteY += j - cy;
                         whitePixelCount++;
-
+                        pixelDrawer.draw(i,j,Color.BLUE);
+                    }
+                    else if (rgb[0] > 140 && rgb[1] > 140 && rgb[2] > 140) {
+//                        Log.d("rgb-color",String.format("%03d %03d %03d",rgb[0],rgb[1],rgb[2]));
+//                        Log.d("thaw-sumwhite","X:" + sumWhiteX);
                         pixelDrawer.draw(i,j,Color.RED);
                     }else {
                         pixelDrawer.draw(i,j,color);
@@ -67,11 +72,10 @@ public class ColorAnalyser {
             }
             pixelDrawer.post();
 
-            int pixelAmount = spanSize/stepSize * spanSize/stepSize * 4;
             int state = 0;
-            if (0.75 * pixelAmount < whitePixelCount) {
+            if (0.75 * count < whitePixelCount) {
                 state = 2;
-            } else if (0.25 * pixelAmount < whitePixelCount) {
+            } else if (0.25 * count < whitePixelCount) {
                 state = 1;
             }
 
@@ -98,7 +102,7 @@ public class ColorAnalyser {
 
             }
             colorToRGB(color,udpout);
-            udpout[7] = (byte) pixelAmount;
+            udpout[7] = (byte) count;
             udpout[8] = (byte) state;
         }catch (Exception e){
             e.printStackTrace();
