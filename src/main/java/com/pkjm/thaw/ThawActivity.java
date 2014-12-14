@@ -137,9 +137,4 @@ public class ThawActivity extends Activity {
         aBlankView.setVisibility(View.VISIBLE);
         findViewById(R.id.whiteCal).setVisibility(View.INVISIBLE);
     }
-
-    public SharedPreferences getPreferences(){
-        return prefs;
-    }
-
 }

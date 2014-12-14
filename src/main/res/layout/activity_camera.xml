@@ -108,7 +108,8 @@
                 android:textSize="16dp"
                 android:textColor="#FFF"
                 android:gravity="top|center"
-                android:text="Put your phone on white part of game.\n Then click on the button below." />
+                android:text="Put your phone on white part of game.\n
+                    Then click on the button below." />
 
             <Button
                 android:layout_width="wrap_content"
