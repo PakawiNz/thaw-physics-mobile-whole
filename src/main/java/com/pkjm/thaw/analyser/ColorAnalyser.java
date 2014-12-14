@@ -96,9 +96,9 @@ public class ColorAnalyser {
                         sumWhiteY += j - cy;
                         whitePixelCount++;
                         pixelDrawer.draw(i,j,Color.BLUE);
-                    }
-                    else if (rgb[0] > 140 && rgb[1] > 140 && rgb[2] > 140) {
-                        pixelDrawer.draw(i,j,Color.RED);
+//                    }
+//                    else if (rgb[0] > 140 && rgb[1] > 140 && rgb[2] > 140) {
+//                        pixelDrawer.draw(i,j,Color.RED);
                     }else {
                         pixelDrawer.draw(i,j,color);
                     }

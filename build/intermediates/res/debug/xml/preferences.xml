@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="Camera2 API">
+            
+        <CheckBoxPreference
+            android:key="check_debug"
+            android:title="Show Debug View"
+            android:summary="" />
+
+        <CheckBoxPreference
+            android:key="check_af_lock"
+            android:title="AF LOCK"
+            android:summary="Turn off Camera's Autofocus Lens Distance" />
+
+        <CheckBoxPreference
+            android:key="check_ae_lock"
+            android:title="AE LOCK"
+            android:summary="Turn off Camera's Autoadjust Exposure Compensation" />
+
+        <EditTextPreference
+            android:key="text_exposure"
+            android:dependency="check_ae_lock"
+            android:title="Adjust Exposure Level"
+            android:dialogTitle="Adjust Exposure Level"
+            android:summary="Manually adjust Exposure Compensation" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Connection Data">
+
+        <CheckBoxPreference
+            android:key="check_autohost"
+            android:disableDependentsState="true"
+            android:title="Auto Find Host"
+            android:summary="Turn on automatic host finding." />
+
+        <EditTextPreference
+            android:key="text_ipv4"
+            android:dependency="check_autohost"
+            android:title="IP Address"
+            android:dialogTitle="IP Address"
+            android:summary="IP Address of Host Machine" />
+
+        <EditTextPreference
+            android:key="text_port"
+            android:dependency="check_autohost"
+            android:title="Port"
+            android:dialogTitle="Port"
+            android:summary="Port of Listening Software" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
+
+<!-- From: file:/C:/Workspace/Android/thaw-physics-mobile/app/src/main/res/xml/preferences.xml -->

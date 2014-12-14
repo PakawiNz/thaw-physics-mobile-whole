@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent">
+
+    <com.pkjm.thaw.camera2.AutoFitTextureView
+        android:id="@+id/texture"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"/>
+
+    <TextureView
+        android:id="@+id/upper_texture"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"/>
+
+</RelativeLayout>
+<!-- From: file:/C:/Workspace/Android/thaw-physics-mobile/app/src/main/res/layout/fragment_camera2_basic.xml -->
