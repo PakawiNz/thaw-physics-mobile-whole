@@ -62,8 +62,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:id="@+id/aBlockView"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
                 android:background="@drawable/block" />
 
             <SurfaceView
@@ -71,23 +69,55 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:id="@+id/aBlankView"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
                 android:background="@drawable/blank" />
 
         </FrameLayout>
 
     </RelativeLayout>
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/whiteCal"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/whiteCal"
-        android:onClick="grabWhite"
-        android:textSize="50dp"
-        android:textStyle="bold"
-        android:textColor="#FFF"
-        android:gravity="center"
-        android:text="White Calibration" />
+        android:background="#88000000"
+        android:weightSum="1.0"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight=".45"
+            android:background="#0000"
+            android:textSize="50dp"
+            android:textStyle="bold"
+            android:textColor="#FFF"
+            android:gravity="bottom|center"
+            android:text="White Calibration" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight=".55"
+            android:orientation="vertical"
+            android:gravity="center|top">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#0000"
+                android:textSize="16dp"
+                android:textColor="#FFF"
+                android:gravity="top|center"
+                android:text="Put your phone on white part of game.\n Then click on the button below." />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="grabWhite"
+                android:text="Calibrate"
+                android:layout_marginTop="10dp" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>
